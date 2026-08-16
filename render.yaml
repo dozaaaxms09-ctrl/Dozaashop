@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: dozaashop
+    env: node
+    plan: free
+    region: oregon
+    repo: https://github.com/dozaaaxms09-ctrl/Dozaashop
+    branch: main
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+    autoDeploy: true
+    pullRequestPreviews:
+      enabled: false
