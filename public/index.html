@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>dozaashop</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo">DOZAASHOP</div>
+    <nav>
+      <a href="/support.html">Support</a>
+      <a href="/admin.html">Admin</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h1 class="title">Digital Games & Credits</h1>
+    <div id="productGrid" class="grid"></div>
+  </main>
+
+  <script>
+    async function loadProducts() {
+      const res = await fetch('/api/products');
+      const prods = await res.json();
+      const grid = document.getElementById('productGrid');
+      grid.innerHTML = prods.map(p => `
+        <div class="card">
+          <img src="${p.cover_image || '/placeholder.jpg'}" class="cover" />
+          <h3>${p.name}</h3>
+          <p class="desc">${p.description || ''}</p>
+          <div class="price">$${(p.price_cents/100).toFixed(2)}</div>
+          <div class="actions">
+            <button class="btn neon" onclick="checkoutStripe('${p._id}')">Buy with Card (Stripe)</button>
+            <button class="btn outline" onclick="checkoutPayPal('${p._1d}')">PayPal</button>
+            <button class="btn outline" onclick="checkoutCashApp('${p._id}')">Cash App</button>
+          </div>
+        </div>
+      `).join('');
+    }
+    async function checkoutStripe(productId){
+      const email = prompt('Email for receipt and delivery:');
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ productId, email })
+      });
+      const data = await res.json();
+      if(data.url) window.location = data.url;
+      else alert('Error creating session: ' + (data.error || JSON.stringify(data)));
+    }
+    async function checkoutPayPal(productId){
+      const email = prompt('Email for receipt and delivery:');
+      const res = await fetch('/api/paypal/create-order', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ productId, email })
+      });
+      const data = await res.json();
+      const link = data.links && data.links.find(l => l.rel === 'approve');
+      if(link) window.location = link.href;
+      else alert('PayPal error');
+    }
+    async function checkoutCashApp(productId){
+      const email = prompt('Email for receipt and delivery:');
+      const res = await fetch('/api/cashapp/create-order', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ productId, email })
+      });
+      const data = await res.json();
+      if (data.orderId) {
+        alert('Order created. Please pay using Cash App to the provided Cashtag and include order ID in the note: ' + data.orderId + '\nCashtag: ' + data.cashtag);
+      } else alert('Error creating cash app order');
+    }
+    loadProducts();
+  </script>
+</body>
+</html>

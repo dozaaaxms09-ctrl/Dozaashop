@@ -1,0 +1,60 @@
+/* styles.css - dark neon theme */
+:root{
+  --bg: #0B0C10;
+  --card: #0F1724;
+  --neon: #00D2FE;
+  --muted: #9AA4B2;
+}
+*{box-sizing:border-box}
+body{
+  background: radial-gradient(ellipse at top left, #05060a 0%, var(--bg) 40%);
+  color: #e6f7ff;
+  margin:0;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+.site-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:18px 32px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.02), transparent);
+  border-bottom: 1px solid rgba(0,210,254,0.06);
+}
+.logo{
+  font-weight:800;
+  color:var(--neon);
+  text-shadow: 0 0 10px rgba(0,210,254,0.14);
+  letter-spacing:2px;
+}
+nav a{ color:#9fbddf; margin-left:16px; text-decoration:none; }
+.container{ max-width:1100px; margin:40px auto; padding:0 20px; }
+.title{ color:var(--neon); text-shadow:0 0 12px rgba(0,210,254,0.18); margin-bottom:18px; }
+.grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:18px; }
+.card{
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.03);
+  padding:16px;
+  border-radius:12px;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.card:hover{ transform: translateY(-6px); box-shadow:0 18px 40px rgba(0,210,254,0.06); }
+.cover{ width:100%; height:140px; object-fit:cover; border-radius:8px; margin-bottom:12px; }
+h3{ margin:6px 0 6px; color:#eafcff; }
+.desc{ color:var(--muted); font-size:13px; height:36px; overflow:hidden; }
+.price{ margin-top:8px; font-weight:700; color:var(--neon); }
+.actions{ margin-top:12px; display:flex; gap:8px; }
+.btn{
+  padding:10px 12px; border-radius:8px; cursor:pointer; border:1px solid transparent; font-weight:700; font-size:13px;
+}
+.btn.neon{
+  background: linear-gradient(90deg, var(--neon), #0072FF);
+  color:#001021;
+  box-shadow: 0 6px 20px rgba(0,210,254,0.18);
+}
+.btn.outline{
+  background:transparent; color:var(--neon); border:1px solid rgba(0,210,254,0.14);
+}
+.footer{
+  padding:30px; text-align:center; color:var(--muted);
+}
