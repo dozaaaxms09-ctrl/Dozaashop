@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Admin — dozaashop</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo">DOZAASHOP ADMIN</div>
+    <nav><a href="/">Store</a></nav>
+  </header>
+
+  <main class="container">
+    <h1 class="title">Admin Panel</h1>
+
+    <div id="authArea">
+      <input id="email" placeholder="email" />
+      <input id="password" type="password" placeholder="password" />
+      <button id="loginBtn" class="btn neon">Login</button>
+      <button id="meBtn" class="btn outline">Check Me</button>
+    </div>
+
+    <section id="ownerActions" style="display:none">
+      <h2>Users (owner management)</h2>
+      <div id="usersList"></div>
+    </section>
+
+    <section id="ordersSection" style="display:none">
+      <h2>Orders (admins)</h2>
+      <div id="ordersList"></div>
+    </section>
+  </main>
+
+  <script>
+    let token = localStorage.getItem('token');
+
+    async function api(path, opts = {}) {
+      opts.headers = opts.headers || {};
+      if (token) opts.headers.Authorization = 'Bearer ' + token;
+      const res = await fetch(path, opts);
+      return res.json();
+    }
+
+    document.getElementById('loginBtn').onclick = async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const r = await api('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }), headers: { 'Content-Type': 'application/json' } });
+      if (r.token) {
+        token = r.token;
+        localStorage.setItem('token', token);
+        alert('Logged in as ' + r.user.email + ' (' + r.user.role + ')');
+        loadMe();
+      } else alert(r.error || 'Login failed');
+    };
+
+    document.getElementById('meBtn').onclick = loadMe;
+
+    async function loadMe() {
+      const r = await api('/api/auth/me');
+      if (!r.user) { alert('Not logged in'); return; }
+      const role = r.user.role;
+      if (role === 'owner') {
+        document.getElementById('ownerActions').style.display = 'block';
+        loadUsers();
+      } else {
+        document.getElementById('ownerActions').style.display = 'none';
+      }
+      if (role === 'admin' || role === 'owner') {
+        document.getElementById('ordersSection').style.display = 'block';
+        loadOrders();
+      } else document.getElementById('ordersSection').style.display = 'none';
+    }
+
+    async function loadUsers() {
+      const r = await api('/api/admin/users');
+      const container = document.getElementById('usersList');
+      container.innerHTML = r.map(u => {
+        const promoteBtn = u.role === 'admin' ? `<button onclick="revokeAdmin('${u._id}')">Revoke Admin</button>` : `<button onclick="assignAdmin('${u._id}')">Make Admin</button>`;
+        return `<div style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.03)">${u.email} — ${u.role} ${promoteBtn}</div>`;
+      }).join('');
+    }
+
+    async function assignAdmin(userId) {
+      const r = await api('/api/admin/assign-admin', { method: 'POST', body: JSON.stringify({ userId }), headers: { 'Content-Type': 'application/json' } });
+      if (r.ok) loadUsers(); else alert(r.error || 'Error');
+    }
+    async function revokeAdmin(userId) {
+      const r = await api('/api/admin/revoke-admin', { method: 'POST', body: JSON.stringify({ userId }), headers: { 'Content-Type': 'application/json' } });
+      if (r.ok) loadUsers(); else alert(r.error || 'Error');
+    }
+
+    async function loadOrders() {
+      const r = await api('/api/admin/orders');
+      const container = document.getElementById('ordersList');
+      container.innerHTML = r.map(o => `<div style="padding:8px;border-bottom:1px solid rgba(255,255,255,0.03)">${o._id} — ${o.email} — $${(o.amount_cents/100).toFixed(2)} — ${o.paid ? 'PAID' : 'UNPAID'}</div>`).join('');
+    }
+
+    if (token) loadMe();
+  </script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Support — dozaashop</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo">DOZAASHOP Support</div>
+    <nav><a href="/">Store</a></nav>
+  </header>
+
+  <main class="container">
+    <h1 class="title">Support</h1>
+    <form id="ticketForm">
+      <input id="email" placeholder="Your email" required />
+      <input id="subject" placeholder="Subject" required />
+      <textarea id="message" placeholder="Describe your issue" required></textarea>
+      <button class="btn neon" type="submit">Send Ticket</button>
+    </form>
+  </main>
+
+  <script>
+    document.getElementById('ticketForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const subject = document.getElementById('subject').value;
+      const message = document.getElementById('message').value;
+      const res = await fetch('/api/support/ticket', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ email, subject, message }) });
+      const data = await res.json();
+      if (data.ok) alert('Ticket created: ' + data.ticketId);
+      else alert('Error');
+    };
+  </script>
+</body>
+</html>
